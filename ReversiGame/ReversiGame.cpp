@@ -158,9 +158,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             DrawField(hdc);
             if (x != 0 || y != 0) {
-                SelectRectangle(hdc, x, y);
-                Sleep(1000);
-                EnemyMove(hdc);
+                bool playerMoved = SelectRectangle(hdc, x, y);
+                if (playerMoved) {
+                    Sleep(1000);
+                    EnemyMove(hdc);
+                }
             }
             EndPaint(hWnd, &ps);
         }
