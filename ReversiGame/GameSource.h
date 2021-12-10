@@ -18,11 +18,42 @@ int field[N][M] = {
 };
 
 int fieldSize = 50;
+bool loaded = false;
+char filesave[] = "save.txt";
 
+int saveGame() {
+    FILE* fin = fopen(filesave, "wt");
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            fprintf(fin, "%d ", field[i][j]);
+        }
+        fprintf(fin, "\n");
+    }
+    fclose(fin);
+    return 1;
+}
 
+int loadGame() {
+    FILE* fin = fopen(filesave, "rt");
+    if (fin == NULL) {
+        return 0;
+    }
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            fscanf(fin, "%d", &field[i][j]);
+        }
+    }
+    loaded = true;
+    fclose(fin);
+    return 1;
+}
 
 void DrawField(HDC hdc) {
-
+    if (!loaded) {
+        loadGame();
+    }
+    saveGame();
     HPEN borderPen;
     borderPen = CreatePen(PS_SOLID, 5, RGB(0, 0, 0));
     SelectObject(hdc, borderPen);
@@ -333,7 +364,7 @@ bool CheckMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
 #pragma endregion
 
 #pragma region EnemyMoving
-bool CheckEnemyMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveLeft(int i, int j, bool wasMovedHere) {
     if (field[i][j - 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j - 1;
@@ -348,13 +379,10 @@ bool CheckEnemyMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpJ--;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             while (tmpJ >= 0) {
                 field[i][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * i, (tmpJ + 1) * fieldSize, (i + 1) * fieldSize);
+
                 if (field[i][tmpJ - 1] == 2) {
                     return true;
                 }
@@ -365,7 +393,7 @@ bool CheckEnemyMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveRight(int i, int j, bool wasMovedHere) {
     if (field[i][j + 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j + 1;
@@ -380,13 +408,10 @@ bool CheckEnemyMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpJ++;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             while (tmpJ < M) {
                 field[i][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * i, (tmpJ + 1) * fieldSize, (i + 1) * fieldSize);
+
                 if (field[i][tmpJ + 1] == 2) {
                     return true;
                 }
@@ -397,7 +422,7 @@ bool CheckEnemyMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpI = i - 1;
@@ -412,13 +437,10 @@ bool CheckEnemyMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpI = i;
             while (tmpI >= 0) {
                 field[tmpI][j] = 2;
-                Rectangle(hdc, fieldSize * j, fieldSize * tmpI, (j + 1) * fieldSize, (tmpI + 1) * fieldSize);
+
                 if (field[tmpI - 1][j] == 2) {
                     return true;
                 }
@@ -429,7 +451,7 @@ bool CheckEnemyMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpI = i + 1;
@@ -444,13 +466,10 @@ bool CheckEnemyMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpI = i;
             while (tmpI < N) {
                 field[tmpI][j] = 2;
-                Rectangle(hdc, fieldSize * j, fieldSize * tmpI, (j + 1) * fieldSize, (tmpI + 1) * fieldSize);
+
                 if (field[tmpI + 1][j] == 2) {
                     return true;
                 }
@@ -462,7 +481,7 @@ bool CheckEnemyMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
 }
 
 
-bool CheckEnemyMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveDiagonalRightUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j - 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j - 1;
@@ -479,14 +498,11 @@ bool CheckEnemyMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             tmpI = i;
             while (tmpJ >= 0 && tmpI < N) {
                 field[tmpI][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
+
                 if (field[tmpI + 1][tmpJ - 1] == 2) {
                     return true;
                 }
@@ -498,7 +514,7 @@ bool CheckEnemyMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveDiagonalRightDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j - 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j - 1;
@@ -515,14 +531,11 @@ bool CheckEnemyMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             tmpI = i;
             while (tmpJ >= 0 && tmpI >= 0) {
                 field[tmpI][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
+
                 if (field[tmpI - 1][tmpJ - 1] == 2) {
                     return true;
                 }
@@ -534,7 +547,7 @@ bool CheckEnemyMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveDiagonalLeftDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j + 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j + 1;
@@ -551,14 +564,10 @@ bool CheckEnemyMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             tmpI = i;
             while (tmpJ < M && tmpI >= 0) {
                 field[tmpI][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI - 1][tmpJ + 1] == 2) {
                     return true;
                 }
@@ -570,7 +579,7 @@ bool CheckEnemyMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckEnemyMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckEnemyMoveDiagonalLeftUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j + 1] == 1 && (field[i][j] == 0 || wasMovedHere)) {
         bool enemyOnLine = false;
         int tmpJ = j + 1;
@@ -587,14 +596,10 @@ bool CheckEnemyMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (enemyOnLine) {
-            HBRUSH enemyBrush;
-            enemyBrush = CreateSolidBrush(RGB(1, 1, 1));
-            SelectObject(hdc, enemyBrush);
             tmpJ = j;
             tmpI = i;
             while (tmpJ < M && tmpI < N) {
                 field[tmpI][tmpJ] = 2;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI + 1][tmpJ + 1] == 2) {
                     return true;
                 }
@@ -607,27 +612,27 @@ bool CheckEnemyMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
 }
 #pragma endregion
 
-void EnemyMove(HDC hdc) {
+void EnemyMove() {
     int i = 0;
     bool moved = false;
     while (i < N) {
         int j = 0;
         while (j < M) {
-            bool movedDown = CheckEnemyMoveDown(hdc, i, j, false);
+            bool movedDown = CheckEnemyMoveDown(i, j, false);
             moved = movedDown || moved;
-            bool movedUp = CheckEnemyMoveUp(hdc, i, j, moved);
+            bool movedUp = CheckEnemyMoveUp(i, j, moved);
             moved = movedUp || moved;
-            bool movedRight = CheckEnemyMoveRight(hdc, i, j, moved);
+            bool movedRight = CheckEnemyMoveRight(i, j, moved);
             moved = movedRight || moved;
-            bool movedLeft = CheckEnemyMoveLeft(hdc, i, j, moved);
+            bool movedLeft = CheckEnemyMoveLeft(i, j, moved);
             moved = movedLeft || moved;
-            bool movedRightUp = CheckEnemyMoveDiagonalRightUp(hdc, i, j, moved);
+            bool movedRightUp = CheckEnemyMoveDiagonalRightUp(i, j, moved);
             moved = moved || movedRightUp;
-            bool movedRightDown = CheckEnemyMoveDiagonalRightDown(hdc, i, j, moved);
+            bool movedRightDown = CheckEnemyMoveDiagonalRightDown(i, j, moved);
             moved = moved || movedRightDown;
-            bool movedLeftDown = CheckEnemyMoveDiagonalLeftDown(hdc, i, j, moved);
+            bool movedLeftDown = CheckEnemyMoveDiagonalLeftDown(i, j, moved);
             moved = moved || movedLeftDown;
-            bool movedLeftUp = CheckEnemyMoveDiagonalLeftUp(hdc, i, j, moved);
+            bool movedLeftUp = CheckEnemyMoveDiagonalLeftUp(i, j, moved);
             moved = moved || movedLeftUp;
             if (moved) {
                 break;

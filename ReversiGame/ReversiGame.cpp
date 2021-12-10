@@ -9,6 +9,7 @@
 int x;
 int y;
 
+
 #define MAX_LOADSTRING 100
 
 // Глобальные переменные:
@@ -161,7 +162,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 bool playerMoved = SelectRectangle(hdc, x, y);
                 if (playerMoved) {
                     Sleep(1000);
-                    EnemyMove(hdc);
+                    EnemyMove();
+                    InvalidateRect(hWnd, NULL, TRUE);
                 }
             }
             EndPaint(hWnd, &ps);
