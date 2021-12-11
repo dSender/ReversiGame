@@ -6,12 +6,12 @@
 #define M 8
 
 int field[N][M] = {
-    {0, 2, 1, 0,	0, 0, 0, 0},
-    {0, 2, 0, 0,	0, 0, 0, 0},
-    {0, 0, 1, 0,	0, 1, 2, 0},
-    {0, 0, 0, 0,	2, 0, 0, 0},
-
     {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 1,	2, 0, 0, 0},
+
+    {0, 0, 0, 2,	1, 0, 0, 0},
     {0, 0, 0, 0,	0, 0, 0, 0},
     {0, 0, 0, 0,	0, 0, 0, 0},
     {0, 0, 0, 0,	0, 0, 0, 0}
@@ -59,7 +59,7 @@ void DrawField(HDC hdc) {
     SelectObject(hdc, borderPen);
 
     HBRUSH fieldBrush;
-    fieldBrush = CreateSolidBrush(RGB(100, 100, 100));
+    fieldBrush = CreateSolidBrush(RGB(101, 67, 33));
 
     HBRUSH playerBrush;
     playerBrush = CreateSolidBrush(RGB(200, 200, 200));
@@ -76,12 +76,16 @@ void DrawField(HDC hdc) {
                 Rectangle(hdc, fieldSize * j, fieldSize * i, (j + 1) * fieldSize, (i + 1) * fieldSize);
             }
             else if (field[i][j] == 1) {
-                SelectObject(hdc, playerBrush);
+                SelectObject(hdc, fieldBrush);
                 Rectangle(hdc, fieldSize * j, fieldSize * i, (j + 1) * fieldSize, (i + 1) * fieldSize);
+                SelectObject(hdc, playerBrush);
+                Ellipse(hdc, fieldSize * j, fieldSize * i, (j + 1) * fieldSize, (i + 1) * fieldSize);
             }
             else if (field[i][j] == 2) {
-                SelectObject(hdc, enemyBrush);
+                SelectObject(hdc, fieldBrush);
                 Rectangle(hdc, fieldSize * j, fieldSize * i, (j + 1) * fieldSize, (i + 1) * fieldSize);
+                SelectObject(hdc, enemyBrush);
+                Ellipse(hdc, fieldSize * j, fieldSize * i, (j + 1) * fieldSize, (i + 1) * fieldSize);
             }
             j++;
         }
@@ -90,7 +94,7 @@ void DrawField(HDC hdc) {
 }
 
 #pragma region PlayerMove
-bool CheckMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveLeft(int i, int j, bool wasMovedHere) {
     if (field[i][j + 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j + 1;
@@ -105,13 +109,9 @@ bool CheckMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpJ++;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
             while (tmpJ < M) {
                 field[i][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * i, (tmpJ + 1) * fieldSize, (i + 1) * fieldSize);
                 if (field[i][tmpJ + 1] == 1) {
                     return true;
                 }
@@ -122,7 +122,7 @@ bool CheckMoveLeft(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveRight(int i, int j, bool wasMovedHere) {
     if (field[i][j - 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j - 1;
@@ -137,13 +137,9 @@ bool CheckMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpJ--;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
-            while (tmpJ > 0) {
+            while (tmpJ >= 0) {
                 field[i][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * i, (tmpJ + 1) * fieldSize, (i + 1) * fieldSize);
                 if (field[i][tmpJ - 1] == 1) {
                     return true;
                 }
@@ -154,7 +150,7 @@ bool CheckMoveRight(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpI = i - 1;
@@ -169,13 +165,9 @@ bool CheckMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpI = i;
-            while (tmpI > 0) {
+            while (tmpI >= 0) {
                 field[tmpI][j] = 1;
-                Rectangle(hdc, fieldSize * j, fieldSize * tmpI, (j + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI - 1][j] == 1) {
                     return true;
                 }
@@ -186,7 +178,7 @@ bool CheckMoveDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpI = i + 1;
@@ -201,13 +193,9 @@ bool CheckMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpI = i;
             while (tmpI < N) {
                 field[tmpI][j] = 1;
-                Rectangle(hdc, fieldSize * j, fieldSize * tmpI, (j + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI + 1][j] == 1) {
                     return true;
                 }
@@ -218,7 +206,7 @@ bool CheckMoveUp(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveDiagonalRightUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j - 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j - 1;
@@ -235,14 +223,10 @@ bool CheckMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
             tmpI = i;
-            while (tmpJ > 0 && tmpI < N) {
+            while (tmpJ >= 0 && tmpI < N) {
                 field[tmpI][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI + 1][tmpJ - 1] == 1) {
                     return true;
                 }
@@ -254,12 +238,12 @@ bool CheckMoveDiagonalRightUp(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveDiagonalRightDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j - 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j - 1;
         int tmpI = i - 1;
-        while (tmpJ >= 0 && tmpI > 0) {
+        while (tmpJ >= 0 && tmpI >= 0) {
             if (field[tmpI][tmpJ] == 1) {
                 playerOnLine = true;
                 break;
@@ -271,14 +255,10 @@ bool CheckMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
             tmpI = i;
-            while (tmpJ > 0 && tmpI > 0) {
+            while (tmpJ >= 0 && tmpI >= 0) {
                 field[tmpI][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI - 1][tmpJ - 1] == 1) {
                     return true;
                 }
@@ -290,7 +270,7 @@ bool CheckMoveDiagonalRightDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveDiagonalLeftDown(int i, int j, bool wasMovedHere) {
     if (field[i - 1][j + 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j + 1;
@@ -307,14 +287,10 @@ bool CheckMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI--;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
             tmpI = i;
-            while (tmpJ < M && tmpI > 0) {
+            while (tmpJ < M && tmpI >= 0) {
                 field[tmpI][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI - 1][tmpJ + 1] == 1) {
                     return true;
                 }
@@ -326,7 +302,7 @@ bool CheckMoveDiagonalLeftDown(HDC hdc, int i, int j, bool wasMovedHere) {
     return false;
 }
 
-bool CheckMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
+bool CheckMoveDiagonalLeftUp(int i, int j, bool wasMovedHere) {
     if (field[i + 1][j + 1] == 2 && (field[i][j] == 0 || wasMovedHere)) {
         bool playerOnLine = false;
         int tmpJ = j + 1;
@@ -343,14 +319,10 @@ bool CheckMoveDiagonalLeftUp(HDC hdc, int i, int j, bool wasMovedHere) {
             tmpI++;
         }
         if (playerOnLine) {
-            HBRUSH playerBrush;
-            playerBrush = CreateSolidBrush(RGB(200, 200, 200));
-            SelectObject(hdc, playerBrush);
             tmpJ = j;
             tmpI = i;
             while (tmpJ < M && tmpI < N) {
                 field[tmpI][tmpJ] = 1;
-                Rectangle(hdc, fieldSize * tmpJ, fieldSize * tmpI, (tmpJ + 1) * fieldSize, (tmpI + 1) * fieldSize);
                 if (field[tmpI + 1][tmpJ + 1] == 1) {
                     return true;
                 }
@@ -646,7 +618,7 @@ void EnemyMove() {
     }
 }
 
-bool SelectRectangle(HDC hdc, int x, int y) {
+bool SelectRectangle(int x, int y) {
     int i = 0;
     bool moved = false;
     bool founded = false;
@@ -654,21 +626,21 @@ bool SelectRectangle(HDC hdc, int x, int y) {
         int j = 0;
         while (j < M) {
             if ((j + 1) * fieldSize > x && (i + 1) * fieldSize > y) {
-                bool movedRight = CheckMoveRight(hdc, i, j, false);
+                bool movedRight = CheckMoveRight(i, j, false);
                 moved = moved || movedRight;
-                bool movedUp = CheckMoveUp(hdc, i, j, moved);
+                bool movedUp = CheckMoveUp(i, j, moved);
                 moved = moved || movedUp;
-                bool movedLeft = CheckMoveLeft(hdc, i, j, moved);
+                bool movedLeft = CheckMoveLeft(i, j, moved);
                 moved = moved || movedLeft;
-                bool movedDown = CheckMoveDown(hdc, i, j, moved);
+                bool movedDown = CheckMoveDown(i, j, moved);
                 moved = moved || movedDown;
-                bool movedRightUp = CheckMoveDiagonalRightUp(hdc, i, j, moved);
+                bool movedRightUp = CheckMoveDiagonalRightUp(i, j, moved);
                 moved = moved || movedRightUp;
-                bool movedRightDown = CheckMoveDiagonalRightDown(hdc, i, j, moved);
+                bool movedRightDown = CheckMoveDiagonalRightDown(i, j, moved);
                 moved = moved || movedRightDown;
-                bool movedLeftDown = CheckMoveDiagonalLeftDown(hdc, i, j, moved);
+                bool movedLeftDown = CheckMoveDiagonalLeftDown(i, j, moved);
                 moved = moved || movedLeftDown;
-                bool movedLeftUp = CheckMoveDiagonalLeftUp(hdc, i, j, moved);
+                bool movedLeftUp = CheckMoveDiagonalLeftUp(i, j, moved);
                 moved = moved || movedLeftUp;
                 founded = true;
                 break;
