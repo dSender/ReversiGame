@@ -129,6 +129,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static HWND hBtn;
+    static HWND hEdit1;
+
     switch (message)
     {
     case WM_COMMAND:
@@ -149,23 +152,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_LBUTTONDOWN:
+    {
         x = LOWORD(lParam); //узнаём координаты
         y = HIWORD(lParam);
         InvalidateRect(hWnd, NULL, TRUE);
+    }
+        break;
+    case WM_CREATE:
+        //hInst = ((LPCREATESTRUCT)lParam)->hInstance;
+        //hEdit1 = CreateWindowW(_T("edit"), _T("Noname"), 
+        //    WS_CHILD | WS_VISIBLE | WS_BORDER | ES_RIGHT, 650, 50, 160, 20,
+        //    hWnd, 0, hInst, NULL);
+        //ShowWindow(hEdit1, SW_SHOWNORMAL);
+
+        //hBtn = CreateWindowW(_T("button"), _T("Enter"),
+        //    WS_CHILD | WS_VISIBLE | WS_BORDER, 650, 100, 160, 20,
+        //    hWnd, 0, hInst, NULL);
+        //ShowWindow(hBtn, SW_SHOWNORMAL);
         break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-
             DrawField(hdc);
             if (x != 0 || y != 0) {
                 bool playerMoved = SelectRectangle(x, y);
                 DrawField(hdc);
+                CheckEndGame(hdc);
                 if (playerMoved) {
                     Sleep(1000);
                     EnemyMove();
                     InvalidateRect(hWnd, NULL, TRUE);
+                    CheckEndGame(hdc);
                 }
             }
             EndPaint(hWnd, &ps);

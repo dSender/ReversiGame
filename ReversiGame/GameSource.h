@@ -17,6 +17,19 @@ int field[N][M] = {
     {0, 0, 0, 0,	0, 0, 0, 0}
 };
 
+int originalField[N][M] = {
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 1,	2, 0, 0, 0},
+
+    {0, 0, 0, 2,	1, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0},
+    {0, 0, 0, 0,	0, 0, 0, 0}
+};
+
+
 int fieldSize = 50;
 bool loaded = false;
 char filesave[] = "save.txt";
@@ -658,5 +671,30 @@ bool SelectRectangle(int x, int y) {
     return founded;
 }
 
+bool CheckEndGame(HDC hdc) {
+    int black = 0;
+    int white = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (field[i][j] == 0) {
+                return false;
+            }
+            else if(field[i][j] == 1) {
+                white++;
+            }
+            else if (field[i][j] == 2) {
+                black++;
+            }
+        }
+    }
+    if (black > white) {
+        TextOutA(hdc, 10, 500, "Фишки черного цвета выиграли", strlen("Фишки черного цвета выиграли"));
+    }
+    else {
+        TextOutA(hdc, 10, 500, "Фишки белого цвета выиграли", strlen("Фишки белого цвета выиграли"));
+    }
+
+    return true;
+}
 
 
