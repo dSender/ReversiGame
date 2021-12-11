@@ -1,14 +1,16 @@
 ﻿// ReversiGame.cpp : Определяет точку входа для приложения.
 //
 
+#include "GameSource.h"
+
 #include "framework.h"
 #include "ReversiGame.h"
-#include "GameSource.h"
+
+
 #include "windows.h"
 
 int x;
 int y;
-
 
 #define MAX_LOADSTRING 100
 
